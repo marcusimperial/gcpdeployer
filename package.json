@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {},
   "keywords": [],
+  "type": "module",
   "author": "marcusimperial",
   "license": "ISC",
   "description": "",
