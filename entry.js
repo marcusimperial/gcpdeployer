@@ -16,6 +16,9 @@ try {
     // Log success of installation
     console.log("Dependencies installed successfully.");
 
+    const files = await readdir('./node_modules/@google-cloud');
+    console.log('Installed packages:', files);
+
             // Construct paths to Google Cloud packages
             const cloudBuildPath = path.resolve(__dirname, 'node_modules/@google-cloud/cloudbuild');
             const storagePath = path.resolve(__dirname, 'node_modules/@google-cloud/storage');
@@ -38,8 +41,7 @@ try {
             global.__WEBPACK_EXTERNAL_MODULE__google_cloud_run_8702af6a__ = run;
             global.__WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__ = compute;
 
-    const files = await readdir('./node_modules/@google-cloud/cloudbuild');
-    console.log('Installed packages:', files);
+
 
     // Construct the path to the index.js file
     const indexPath = join(__dirname, 'index.js');
