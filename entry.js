@@ -20,10 +20,10 @@ try {
     console.log('Installed packages:', files);
 
             // Construct paths to Google Cloud packages
-            const cloudBuildPath = resolve(__dirname, 'node_modules/@google-cloud/cloudbuild/build/src/index.js');
-            const storagePath = resolve(__dirname, 'node_modules/@google-cloud/storage/build/src/index.js');
-            const runPath = resolve(__dirname, 'node_modules/@google-cloud/run/build/src/index.js');
-            const computePath = resolve(__dirname, 'node_modules/@google-cloud/compute/build/src/index.js');
+            const cloudBuildPath = path.resolve(__dirname, 'node_modules/@google-cloud/cloudbuild/build/src/index.js');
+            const storagePath = path.resolve(__dirname, 'node_modules/@google-cloud/storage/build/src/index.js');
+            const runPath = path.resolve(__dirname, 'node_modules/@google-cloud/run/build/src/index.js');
+            const computePath = path.resolve(__dirname, 'node_modules/@google-cloud/compute/build/src/index.js');
     
             // Dynamically import Google Cloud packages using absolute paths
             const [cloudBuild, storage, run, compute] = await Promise.all([
