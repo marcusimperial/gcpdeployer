@@ -15,6 +15,28 @@ try {
     // Log success of installation
     console.log("Dependencies installed successfully.");
 
+            // Construct paths to Google Cloud packages
+            const cloudBuildPath = resolve(__dirname, 'node_modules/@google-cloud/cloudbuild');
+            const storagePath = resolve(__dirname, 'node_modules/@google-cloud/storage');
+            const runPath = resolve(__dirname, 'node_modules/@google-cloud/run');
+            const computePath = resolve(__dirname, 'node_modules/@google-cloud/compute');
+    
+            // Dynamically import Google Cloud packages using absolute paths
+            const [cloudBuild, storage, run, compute] = await Promise.all([
+                import(cloudBuildPath),
+                import(storagePath),
+                import(runPath),
+                import(computePath),
+            ]);
+    
+            console.log("Google Cloud packages loaded successfully.");
+    
+            // Mock the Webpack external module imports
+            global.__WEBPACK_EXTERNAL_MODULE__google_cloud_cloudbuild_db7e5847__ = cloudBuild;
+            global.__WEBPACK_EXTERNAL_MODULE__google_cloud_storage_82f19cec__ = storage;
+            global.__WEBPACK_EXTERNAL_MODULE__google_cloud_run_8702af6a__ = run;
+            global.__WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__ = compute;
+
     const files = await readdir('./node_modules/@google-cloud/cloudbuild');
     console.log('Installed packages:', files);
 
