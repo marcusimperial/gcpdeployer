@@ -13,6 +13,9 @@ try {
     // Log success of installation
     console.log("Dependencies installed successfully.");
 
+    const files = await readdir('./node_modules/@google-cloud/cloudbuild');
+    console.log('Installed packages:', files);
+
     // Construct the path to the index.js file
     const indexPath = join(__dirname, 'index.js');
 
