@@ -1,6 +1,8 @@
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { readdir } from 'fs/promises';
+
 
 // Determine the directory of the current file in ESM
 const __filename = fileURLToPath(import.meta.url);
