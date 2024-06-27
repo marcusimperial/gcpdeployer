@@ -1,0 +1,43 @@
+name: "Action"
+
+inputs:
+  load_balancer:
+    description: "Load balancer name"
+    required: true
+  naked_domain:
+    description: "Naked domain"
+    required: true
+  project_id:
+    description: "Project ID"
+    required: true
+  deployment_bucket:
+    description: "Deployment bucket"
+    required: true
+  operation:
+    description: "Action inputs"
+    required: true
+    # default: "update"
+  type: 
+    description: "Type of operation"
+    required: true
+    # default: "backend"
+  location:
+    description: "Location information"
+    required: true
+    # default: "us-west1"
+  name:
+    description: "Service name"
+    required: true
+    # default: "dev-api"
+  path:
+    description: "File path"
+    required: true
+    # default: "../"
+  database:
+    description: "Database name"
+    required: true
+
+runs:
+  using: "node20"
+  main: "./index.js"
+  # action scripts
