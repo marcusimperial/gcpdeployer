@@ -1197,8 +1197,6 @@ const updateFrontend = async (folderPath, websiteName, location, config) => {
     console.timeEnd();
     return true;
 };
-;// CONCATENATED MODULE: external "child_process"
-const external_child_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("child_process");
 ;// CONCATENATED MODULE: ./src/index.js
 
 
@@ -1208,7 +1206,6 @@ const external_child_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(
 
 const runApp = async () => {
     try {
-        (0,external_child_process_namespaceObject.execSync)('npm install @actions/core @google-cloud/artifact-registry @google-cloud/cloudbuild @google-cloud/compute @google-cloud/run @google-cloud/storage archiver bl dotenv google-auth-library', { stdio: 'inherit' });
 
         // get inputs
         const load_balancer = (0,core_namespaceObject.getInput)('load_balancer');
