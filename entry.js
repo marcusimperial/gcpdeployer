@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readdir } from 'fs/promises';
+import path from 'path';
 
 
 // Determine the directory of the current file in ESM
@@ -16,10 +17,10 @@ try {
     console.log("Dependencies installed successfully.");
 
             // Construct paths to Google Cloud packages
-            const cloudBuildPath = resolve(__dirname, 'node_modules/@google-cloud/cloudbuild');
-            const storagePath = resolve(__dirname, 'node_modules/@google-cloud/storage');
-            const runPath = resolve(__dirname, 'node_modules/@google-cloud/run');
-            const computePath = resolve(__dirname, 'node_modules/@google-cloud/compute');
+            const cloudBuildPath = path.resolve(__dirname, 'node_modules/@google-cloud/cloudbuild');
+            const storagePath = path.resolve(__dirname, 'node_modules/@google-cloud/storage');
+            const runPath = path.resolve(__dirname, 'node_modules/@google-cloud/run');
+            const computePath = path.resolve(__dirname, 'node_modules/@google-cloud/compute');
     
             // Dynamically import Google Cloud packages using absolute paths
             const [cloudBuild, storage, run, compute] = await Promise.all([
