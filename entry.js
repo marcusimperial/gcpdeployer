@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 
 try {
     // Install all required packages
-    execSync('npm install @actions/core @google-cloud/artifact-registry @google-cloud/cloudbuild @google-cloud/compute @google-cloud/run @google-cloud/storage archiver bl dotenv google-auth-library', { stdio: 'inherit' });
+    execSync('npm install @google-cloud/artifact-registry @google-cloud/cloudbuild @google-cloud/compute @google-cloud/run @google-cloud/storage google-auth-library', { stdio: 'inherit' });
 
     // Log success of installation
     console.log("Dependencies installed successfully.");
@@ -19,27 +19,27 @@ try {
     const files = await readdir('./node_modules/@google-cloud');
     console.log('Installed packages:', files);
 
-            // Construct paths to Google Cloud packages
-            const cloudBuildPath = '../../../../server/server/node_modules/@google-cloud/cloudbuild/build/src/index.js';
-            const storagePath = '../../../../server/server/node_modules/@google-cloud/storage/build/src/index.js';
-            const runPath = '../../../../server/server/node_modules/@google-cloud/run/build/src/index.js';
-            const computePath = '../../../../server/server/node_modules/@google-cloud/compute/build/src/index.js';
+            // // Construct paths to Google Cloud packages
+            // const cloudBuildPath = '../../../../server/server/node_modules/@google-cloud/cloudbuild/build/src/index.js';
+            // const storagePath = '../../../../server/server/node_modules/@google-cloud/storage/build/src/index.js';
+            // const runPath = '../../../../server/server/node_modules/@google-cloud/run/build/src/index.js';
+            // const computePath = '../../../../server/server/node_modules/@google-cloud/compute/build/src/index.js';
     
-            // Dynamically import Google Cloud packages using absolute paths
-            const [cloudBuild, storage, run, compute] = await Promise.all([
-                import(cloudBuildPath),
-                import(storagePath),
-                import(runPath),
-                import(computePath),
-            ]);
+            // // Dynamically import Google Cloud packages using absolute paths
+            // const [cloudBuild, storage, run, compute] = await Promise.all([
+            //     import(cloudBuildPath),
+            //     import(storagePath),
+            //     import(runPath),
+            //     import(computePath),
+            // ]);
     
-            console.log("Google Cloud packages loaded successfully.");
+            // console.log("Google Cloud packages loaded successfully.");
     
-            // Mock the Webpack external module imports
-            global.__WEBPACK_EXTERNAL_MODULE__google_cloud_cloudbuild_db7e5847__ = cloudBuild;
-            global.__WEBPACK_EXTERNAL_MODULE__google_cloud_storage_82f19cec__ = storage;
-            global.__WEBPACK_EXTERNAL_MODULE__google_cloud_run_8702af6a__ = run;
-            global.__WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__ = compute;
+            // // Mock the Webpack external module imports
+            // global.__WEBPACK_EXTERNAL_MODULE__google_cloud_cloudbuild_db7e5847__ = cloudBuild;
+            // global.__WEBPACK_EXTERNAL_MODULE__google_cloud_storage_82f19cec__ = storage;
+            // global.__WEBPACK_EXTERNAL_MODULE__google_cloud_run_8702af6a__ = run;
+            // global.__WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__ = compute;
 
 
 
