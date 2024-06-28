@@ -46412,7 +46412,7 @@ function validateCookieMaxAge (maxAge) {
 
 /**
  * @see https://www.rfc-editor.org/rfc/rfc6265#section-4.1.1
- * @param {import('./index').Cookie} cookie
+ * @param {import('./index.mjs').Cookie} cookie
  */
 function stringify (cookie) {
   if (cookie.name.length === 0) {
