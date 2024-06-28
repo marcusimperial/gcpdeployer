@@ -39,5 +39,5 @@ inputs:
 
 runs:
   using: "node20"
-  main: "./index.mjs"
+  main: "./index.js"
   # action scripts
