@@ -1,8 +1,8 @@
 import { createRequire as __WEBPACK_EXTERNAL_createRequire } from "module";
-import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_cloudbuild_db7e5847__ from "./cloudbuild/build/src/index.js";
-import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_storage_82f19cec__ from "./storage/build/src/index.js";
-import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_run_8702af6a__ from "./run/build/src/index.js";
-import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__ from "./compute/build/src/index.js";
+import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_cloudbuild_db7e5847__ from "./node_modules/@google-cloud/cloudbuild/build/src/index.js";
+import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_storage_82f19cec__ from "./node_modules/@google-cloud/storage/build/src/index.js";
+import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_run_8702af6a__ from "./node_modules/@google-cloud/run/build/src/index.js";
+import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__ from "./node_modules/@google-cloud/compute/build/src/index.js";
 /******/ var __webpack_modules__ = ({
 
 /***/ 2690:
