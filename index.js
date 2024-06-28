@@ -1,8 +1,8 @@
 import { createRequire as __WEBPACK_EXTERNAL_createRequire } from "module";
-import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_cloudbuild_db7e5847__ from "./node_modules/@google-cloud/cloudbuild/index.js";
-import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_storage_82f19cec__ from "./node_modules/@google-cloud/storage/index.js";
-import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_run_8702af6a__ from "./node_modules/@google-cloud/run/index.js";
-import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__ from "./node_modules/@google-cloud/compute/index.js";
+import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_cloudbuild_db7e5847__ from "./node_modules/@google-cloud/cloudbuild/build/src/index.js";
+import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_storage_82f19cec__ from "./node_modules/@google-cloud/storage/build/src/index.js";
+import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_run_8702af6a__ from "./node_modules/@google-cloud/run/build/src/index.js";
+import * as __WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__ from "./node_modules/@google-cloud/compute/build/src/index.js";
 /******/ var __webpack_modules__ = ({
 
 /***/ 2690:
@@ -65615,7 +65615,7 @@ var __webpack_exports__ = {};
 
 // EXTERNAL MODULE: ./node_modules/dotenv/config.js
 var config = __nccwpck_require__(9236);
-;// CONCATENATED MODULE: external "./node_modules/@google-cloud/cloudbuild/index.js"
+;// CONCATENATED MODULE: external "./node_modules/@google-cloud/cloudbuild/build/src/index.js"
 var x = y => { var x = {}; __nccwpck_require__.d(x, y); return x; }
 var y = x => () => x
 const cloudbuild_namespaceObject = x({ ["CloudBuildClient"]: () => __WEBPACK_EXTERNAL_MODULE__google_cloud_cloudbuild_db7e5847__.CloudBuildClient });
@@ -65703,7 +65703,7 @@ const readEnvironmentVariables = async (dirPath) => {
 };
 
 
-;// CONCATENATED MODULE: external "./node_modules/@google-cloud/storage/index.js"
+;// CONCATENATED MODULE: external "./node_modules/@google-cloud/storage/build/src/index.js"
 var storage_x = y => { var x = {}; __nccwpck_require__.d(x, y); return x; }
 var storage_y = x => () => x
 const storage_namespaceObject = storage_x({ ["Storage"]: () => __WEBPACK_EXTERNAL_MODULE__google_cloud_storage_82f19cec__.Storage });
@@ -65900,7 +65900,7 @@ const createBuild = async (objectFileName, defaultLocation, sysConfig) => {
         return false;
     }
 };
-;// CONCATENATED MODULE: external "./node_modules/@google-cloud/run/index.js"
+;// CONCATENATED MODULE: external "./node_modules/@google-cloud/run/build/src/index.js"
 var run_x = y => { var x = {}; __nccwpck_require__.d(x, y); return x; }
 var run_y = x => () => x
 const run_namespaceObject = run_x({ ["ServicesClient"]: () => __WEBPACK_EXTERNAL_MODULE__google_cloud_run_8702af6a__.ServicesClient });
@@ -65986,7 +65986,7 @@ const makePublic = async (serviceName) => {
         return false;
     }
 };
-;// CONCATENATED MODULE: external "./node_modules/@google-cloud/compute/index.js"
+;// CONCATENATED MODULE: external "./node_modules/@google-cloud/compute/build/src/index.js"
 var compute_x = y => { var x = {}; __nccwpck_require__.d(x, y); return x; }
 var compute_y = x => () => x
 const compute_namespaceObject = compute_x({ ["BackendBucketsClient"]: () => __WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__.BackendBucketsClient, ["BackendServicesClient"]: () => __WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__.BackendServicesClient, ["GlobalOperationsClient"]: () => __WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__.GlobalOperationsClient, ["RegionNetworkEndpointGroupsClient"]: () => __WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__.RegionNetworkEndpointGroupsClient, ["UrlMapsClient"]: () => __WEBPACK_EXTERNAL_MODULE__google_cloud_compute_35b247eb__.UrlMapsClient });
