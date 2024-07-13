@@ -65681,7 +65681,7 @@ const getPath = (inputPath) => inputPath;
 
 const generateId = () => (0,external_crypto_.randomBytes)(16).toString('hex');
 
-const readEnvironmentVariables = async (dirPath) => {
+const readEnvironmentVariables = async (dirPath, environment) => {
     try {
         const filePath = external_path_.join(dirPath, '.env');
         (0,core.info)('env file path', filePath)
@@ -65695,6 +65695,7 @@ const readEnvironmentVariables = async (dirPath) => {
             (0,core.info)(data[0], data[1]);
             newVariables.push({ name: data[0], value: data[1] });
         }; 
+        if (environment) newVariables.push({ name: 'NODE_ENV', value: environment });
         return newVariables;
     } catch (e) {
         (0,core.info)(e);
@@ -66309,15 +66310,17 @@ const runApp = async () => {
         if (operation === 'create' && type === 'frontend') return createFrontend(path, name, location, config);
         else if (operation === 'update' && type === 'frontend') return updateFrontend(path, name, location, config);
         else if (operation === 'create' && type === 'backend') {
+            const environment = (0,core.getInput)('environment');
             // get variables
-            const variables = await readEnvironmentVariables(path);
+            const variables = await readEnvironmentVariables(path, environment);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             // get database
             if (!database) return (0,core.setFailed)('Err: Missing database connection.');
             return createBackend(path, name, location, variables, config, database);
         } else if (operation === 'update' && type === 'backend') {
+            const environment = (0,core.getInput)('environment');
             // get variables
-            const variables = await readEnvironmentVariables(path);
+            const variables = await readEnvironmentVariables(path, environment);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             if (!database) return (0,core.setFailed)('Err: Missing database connection.');
             return updateBackend(path, name, location, variables, config, database);

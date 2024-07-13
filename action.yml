@@ -36,6 +36,9 @@ inputs:
   database:
     description: "Database name"
     required: true
+  environment:
+    description: "Environment name"
+    required: false
 
 runs:
   using: "node20"
