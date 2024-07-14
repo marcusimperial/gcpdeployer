@@ -65930,7 +65930,7 @@ const createService = async (serviceName, image, envVariables = [], defaultLocat
                     serviceAccount, 
                     containers: [ { image, env: envVariables, volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] }],
                     volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }], 
-                    scaling: { minInstanceCount: instances || 0 }
+                    scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 }
                 }            
             },
             serviceId: serviceName
@@ -65961,7 +65961,7 @@ const updateService = async (serviceName, image, envVariables = [], defaultLocat
                     serviceAccount, 
                     containers: [ { image, env: envVariables, volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] }],
                     volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }],
-                    scaling: { minInstanceCount: instances || 0 }
+                    scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 }
                 }            
             }
         };
