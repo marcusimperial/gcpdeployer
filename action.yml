@@ -16,29 +16,28 @@ inputs:
   operation:
     description: "Action inputs"
     required: true
-    # default: "update"
   type: 
     description: "Type of operation"
     required: true
-    # default: "backend"
   location:
     description: "Location information"
     required: true
-    # default: "us-west1"
   name:
     description: "Service name"
     required: true
-    # default: "dev-api"
   path:
     description: "File path"
     required: true
-    # default: "../"
   database:
     description: "Database name"
     required: true
   environment:
     description: "Environment name"
     required: false
+  instances: 
+    description: "Number of instances"
+    required: false
+    default: 0
 
 runs:
   using: "node20"

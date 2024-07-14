@@ -65918,7 +65918,7 @@ const run_getClient = async () => {
 
 // createService
 
-const createService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId) => {
+const createService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId, instances) => {
     if (!serviceName || !image) return false;
     try {
         const { serviceAccount, project } = await run_getClient();
@@ -65929,7 +65929,8 @@ const createService = async (serviceName, image, envVariables = [], defaultLocat
                 template: { 
                     serviceAccount, 
                     containers: [ { image, env: envVariables, volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] }],
-                    volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] 
+                    volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }], 
+                    scaling: { minInstanceCount: instances || 0 }
                 }            
             },
             serviceId: serviceName
@@ -65948,7 +65949,7 @@ const createService = async (serviceName, image, envVariables = [], defaultLocat
 
 // updateService
 
-const updateService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId) => {
+const updateService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId, instances) => {
     if (!serviceName || !image) return false;
     try {
         const { serviceAccount, project } = await run_getClient();
@@ -65959,7 +65960,8 @@ const updateService = async (serviceName, image, envVariables = [], defaultLocat
                 template: { 
                     serviceAccount, 
                     containers: [ { image, env: envVariables, volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] }],
-                    volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] 
+                    volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }],
+                    scaling: { minInstanceCount: instances || 0 }
                 }            
             }
         };
@@ -66128,7 +66130,7 @@ const createMapping = async (serviceName, backendLink, sysConfig) => {
 
 
 
-const createBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId) => {
+const createBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances) => {
     console.time();
 
     (0,core.info)('STEP 1 of 10: Beginning archive...');
@@ -66144,7 +66146,7 @@ const createBackend = async (folderPath, serviceName, location, envVariables, co
     if (!build) return (0,core.setFailed)('Build creation failed!', build);
 
     (0,core.info)('STEP 4 of 10: Beginning service creation... (2/3 longrunning - 25%)');
-    const service = await createService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId);
+    const service = await createService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId, instances);
     if (!service) return (0,core.setFailed)('Service creation failed!', service);
 
     (0,core.info)('STEP 5 of 10: Beginning public access...');
@@ -66176,7 +66178,7 @@ const createBackend = async (folderPath, serviceName, location, envVariables, co
     return true;
 };
 
-const updateBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId) => {
+const updateBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances) => {
     console.time();
 
     (0,core.info)('STEP 1 of 5: Beginning archive...');
@@ -66195,7 +66197,7 @@ const updateBackend = async (folderPath, serviceName, location, envVariables, co
     if (!build) return (0,core.setFailed)('Build creation failed!', build);
 
     (0,core.info)('STEP 4 of 5: Beginning service creation... (2/2 longrunning - 30%)');
-    const service = await updateService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId);
+    const service = await updateService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId, instances);
     if (!service) return (0,core.setFailed)('Service creation failed!', service);
 
     (0,core.info)('STEP 5 of 5: Beginning file clean-up...');
@@ -66311,19 +66313,21 @@ const runApp = async () => {
         else if (operation === 'update' && type === 'frontend') return updateFrontend(path, name, location, config);
         else if (operation === 'create' && type === 'backend') {
             const environment = (0,core.getInput)('environment');
+            const instances = (0,core.getInput)('instances');
             // get variables
             const variables = await readEnvironmentVariables(path, environment);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             // get database
             if (!database) return (0,core.setFailed)('Err: Missing database connection.');
-            return createBackend(path, name, location, variables, config, database);
+            return createBackend(path, name, location, variables, config, database, instances);
         } else if (operation === 'update' && type === 'backend') {
             const environment = (0,core.getInput)('environment');
+            const instances = (0,core.getInput)('instances');
             // get variables
             const variables = await readEnvironmentVariables(path, environment);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             if (!database) return (0,core.setFailed)('Err: Missing database connection.');
-            return updateBackend(path, name, location, variables, config, database);
+            return updateBackend(path, name, location, variables, config, database, instances);
         } else return (0,core.setFailed)('Err: Invalid operation and/or deployment types.');
     } catch (e) {
         console.error(e);
