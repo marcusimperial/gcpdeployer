@@ -65681,9 +65681,22 @@ const getPath = (inputPath) => inputPath;
 
 const generateId = () => (0,external_crypto_.randomBytes)(16).toString('hex');
 
+const checkFileExists = async (path = '') => {
+    try {
+        await (0,promises_namespaceObject.access)(path);
+        return true;
+    } catch {
+        return false;
+    }
+};
+
 const readEnvironmentVariables = async (dirPath, environment) => {
+    let newVariables = [];
+    if (environment) newVariables.push({ name: 'NODE_ENV', value: environment });
     try {
         const filePath = external_path_.join(dirPath, '.env');
+        const fileExists = await checkFileExists(filePath);
+        if (!fileExists) return newVariables;
         (0,core.info)('env file path', filePath)
         const file = await (0,promises_namespaceObject.readFile)(filePath, 'utf-8');
         const variables = file.split(/\r?\n|\r|\n/g);
@@ -65695,7 +65708,6 @@ const readEnvironmentVariables = async (dirPath, environment) => {
             (0,core.info)(data[0], data[1]);
             newVariables.push({ name: data[0], value: data[1] });
         }; 
-        if (environment) newVariables.push({ name: 'NODE_ENV', value: environment });
         return newVariables;
     } catch (e) {
         (0,core.info)(e);
