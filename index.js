@@ -65700,7 +65700,6 @@ const readEnvironmentVariables = async (dirPath, environment) => {
         (0,core.info)('env file path', filePath)
         const file = await (0,promises_namespaceObject.readFile)(filePath, 'utf-8');
         const variables = file.split(/\r?\n|\r|\n/g);
-        let newVariables = [];
         for (const variable of variables) {
             if (variable.includes('#')) continue;
             const data = variable.split('=');
