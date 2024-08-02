@@ -66122,7 +66122,7 @@ const createMapping = async (serviceName, backendLink, sysConfig) => {
             urlMapResource: {
                 name: sysConfig.load_balancer,
                 pathMatchers: [ ...list?.pathMatchers, { name: `${serviceName}-path`, defaultService: backendLink } ],
-                hostRules: [ ...list?.hostRules, { hosts: [ `${serviceName}.${sysConfig['naked-domain']}` ], pathMatcher: `${serviceName}-path` } ]
+                hostRules: [ ...list?.hostRules, { hosts: [ `${serviceName}.${sysConfig.naked_domain}` ], pathMatcher: `${serviceName}-path` } ]
             }
         };
         const [ operation ] = await mappings.patch(config);
