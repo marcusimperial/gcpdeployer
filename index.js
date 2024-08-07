@@ -65647,11 +65647,23 @@ const utils_dirname = (0,external_path_.dirname)(utils_filename);
 
 const archiveFile = async (dirPath) => {
     const sourceDir = dirPath;
-    (0,core.info)('archive file path', sourceDir);
     const archive = archiver('tar', { gzip: true, gzipOptions: { zlib: { level: 9 } } } );
     return new Promise((resolve) => {
         let bufferString;
         archive.glob('**/*', { cwd: external_path_.resolve(sourceDir), ignore: [ 'node_modules/**' ] });
+        archive.pipe((0,bl.BufferListStream)((err, data) => bufferString = data));
+        archive.on('end', () => resolve(bufferString));
+        archive.on('error', () => resolve(false));
+        archive.finalize();
+    });
+};
+
+const archiveFileZip = async (dirPath) => {
+    const sourceDir = dirPath;
+    const archive = archiver('zip', { zlib: { level: 9 } } );
+    return new Promise((resolve) => {
+        let bufferString;
+        archive.glob('**/*', { cwd: external_path_.resolve(sourceDir), ignore: [ 'node_modules/**', '.github/**', '.git/**', '.gitignore', '.gitmodules', '.gitattributes' ] });
         archive.pipe((0,bl.BufferListStream)((err, data) => bufferString = data));
         archive.on('end', () => resolve(bufferString));
         archive.on('error', () => resolve(false));
@@ -65689,6 +65701,19 @@ const checkFileExists = async (path = '') => {
         return false;
     }
 };
+
+const readJSONFile = async (filePath) => {
+    try {
+        const exists = await checkFileExists(filePath)
+        if (!exists) return false
+
+        const fileContent = await fs.readFile(filePath, 'utf-8')
+        const jsonData = JSON.parse(fileContent)
+        return jsonData
+    } catch (error) {
+        return false
+    }
+}
 
 const readEnvironmentVariables = async (dirPath, environment) => {
     let newVariables = [];
@@ -65758,6 +65783,18 @@ const uploadFile = async (bufferCont, sysConfig) => {
         const storageBucketReference = storage.bucket(sysConfig.deployment_bucket);
         const fileName = `${generateId()}.tar.gz`;
         await storageBucketReference.file(`deployments/${fileName}`).save(bufferCont);
+        return fileName;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+};
+
+const uploadZipFile = async (bufferCont, bucket, name) => {
+    try {
+        const storageBucketReference = storage.bucket(bucket);
+        const fileName = `${name}.zip`;
+        await storageBucketReference.file(fileName).save(bufferCont);
         return fileName;
     } catch (e) {
         console.error(e);
@@ -65844,6 +65881,18 @@ const makeFrontendPublic = async (bucket) => {
         return false;
     }
 }; 
+
+const makeFilePublic = async (bucket, path = '') => {
+    if (!path || !bucket) return false;
+    try {
+        const operation = await storage.bucket(bucket).file(path).makePublic();
+        if (!operation) return false;
+        return operation;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+};
 
 const createBucket = async (bucket, metadata = {}) => {
     if (!bucket) return false;
@@ -66200,8 +66249,6 @@ const updateBackend = async (folderPath, serviceName, location, envVariables, co
     const upload = await uploadFile(archivedFile, config);
     if (!upload) return (0,core.setFailed)('Upload failed!', upload);
 
-    
-
     (0,core.info)('STEP 3 of 5: Beginning build creation... (1/3 longrunning - 70%)');
     const build = await createBuild(upload, location, config);
     (0,core.info)(build);
@@ -66291,6 +66338,80 @@ const updateFrontend = async (folderPath, websiteName, location, config) => {
     console.timeEnd();
     return true;
 };
+
+const createStaticFrontend = async (folderPath, websiteName, location, config) => {
+    console.time();
+
+    const bucketName = `${config.project_id}-${websiteName}`;
+
+    (0,core.info)('STEP 1 OF 8: Beginning source creation...');
+    const source = await createBucket(bucketName);
+    if (!source) return (0,core.setFailed)('Source creation failed!', source);
+
+    (0,core.info)('STEP 2 of 8: Beginning instance creation...');
+    const instance = await createFrontendInstance(websiteName, bucketName, config);
+    if (!instance) return (0,core.setFailed)('Instance creation failed!', instance);
+
+    (0,core.info)('STEP 3 of 8: Tracking instance creation...');
+    const trackedInstance = await awaitInstance(instance?.name, config);
+    if (!trackedInstance) return (0,core.setFailed)('Instance tracking failed!', trackedInstance);
+
+    (0,core.info)('STEP 4 of 8: Beginning mapping creation...');
+    const mapping = await createMapping(websiteName, instance?.latestResponse?.targetLink, config);
+    if (!mapping) return (0,core.setFailed)('Mapping creation failed!', mapping);
+
+    (0,core.info)('STEP 5 of 8: Beginning JSON Config retrieval attempt...');
+    let fileName = generateId();
+    const packageConfig = await readJSONFile(`${folderPath}/config.json`);
+    if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
+    else fileName = `${packageConfig?.name}-${packageConfig?.version}`;
+
+    (0,core.info)('STEP 6 of 8: Beginning archive...');
+    const archivedFile = await archiveFileZip(folderPath);
+    if (!archivedFile) return (0,core.setFailed)('Archive failed!', archivedFile);
+
+    (0,core.info)('STEP 7 of 8: Beginning file upload...');
+    const upload = await uploadZipFile(archivedFile, bucketName, fileName);
+    if (!upload) return (0,core.setFailed)('Upload failed!', upload);
+
+    (0,core.info)('STEP 8 of 8: Beginning public access...');
+    const access = await makeFilePublic(bucketName, fileName);
+    if (!access) return (0,core.setFailed)('Public access failed!', access);
+    
+    (0,core.info)('Frontend successfully created.');
+    (0,core.info)(`The file is available at ${websiteName}.${config?.naked_domain}/${fileName}.`);
+    console.timeEnd();
+    return true;
+
+};
+
+const updateStaticFrontend = async (folderPath, websiteName, location, config) => {
+    console.time();
+
+    (0,core.info)('STEP 1 of 4: Beginning JSON Config retrieval attempt...');
+    let fileName = generateId();
+    const packageConfig = await readJSONFile(`${folderPath}/config.json`);
+    if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
+    else fileName = `${packageConfig?.name}-${packageConfig?.version}`;
+
+    (0,core.info)('STEP 2 of 4: Beginning archive...');
+    const archivedFile = await archiveFileZip(folderPath);
+    if (!archivedFile) return (0,core.setFailed)('Archive failed!', archivedFile);
+
+    (0,core.info)('STEP 3 of 4: Beginning file upload...');
+    const upload = await uploadZipFile(archivedFile, bucketName, fileName);
+    if (!upload) return (0,core.setFailed)('Upload failed!', upload);
+
+    (0,core.info)('STEP 4 of 4: Beginning public access...');
+    const access = await makeFilePublic(bucketName, fileName);
+    if (!access) return (0,core.setFailed)('Public access failed!', access);
+    
+    (0,core.info)('Frontend successfully created.');
+    (0,core.info)(`The file is available at ${websiteName}.${config?.naked_domain}/${fileName}.`);
+    console.timeEnd();
+    return true;
+
+};
 ;// CONCATENATED MODULE: ./src/index.js
 
 
@@ -66300,7 +66421,6 @@ const updateFrontend = async (folderPath, websiteName, location, config) => {
 
 const runApp = async () => {
     try {
-
         // get inputs
         const load_balancer = (0,core.getInput)('load_balancer');
         const naked_domain = (0,core.getInput)('naked_domain');
@@ -66322,6 +66442,8 @@ const runApp = async () => {
         // handle corresponding process
         if (operation === 'create' && type === 'frontend') return createFrontend(path, name, location, config);
         else if (operation === 'update' && type === 'frontend') return updateFrontend(path, name, location, config);
+        else if (operation === 'create' && type === 'static') return createStaticFrontend(path, name, location, config);
+        else if (operation === 'update' && type === 'static') return updateStaticFrontend(path, name, location, config);
         else if (operation === 'create' && type === 'backend') {
             const environment = (0,core.getInput)('environment');
             const instances = (0,core.getInput)('instances');
@@ -66339,7 +66461,7 @@ const runApp = async () => {
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             if (!database) return (0,core.setFailed)('Err: Missing database connection.');
             return updateBackend(path, name, location, variables, config, database, instances);
-        } else return (0,core.setFailed)('Err: Invalid operation and/or deployment types.');
+        } return (0,core.setFailed)('Err: Invalid operation and/or deployment types.');
     } catch (e) {
         console.error(e);
         return (0,core.setFailed)('Err: Something went wrong.');
