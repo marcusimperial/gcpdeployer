@@ -66367,7 +66367,7 @@ const createStaticFrontend = async (folderPath, websiteName, location, config) =
     let fileName = generateId();
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
     if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
-    else fileName = encodeURIComponent(`${packageConfig?.name}-${packageConfig?.version}`);
+    else fileName = `${packageConfig?.name}-${packageConfig?.version}`;
 
     (0,core.info)('STEP 6 of 8: Beginning archive...');
     const archivedFile = await archiveFileZip(folderPath);
@@ -66378,7 +66378,7 @@ const createStaticFrontend = async (folderPath, websiteName, location, config) =
     if (!upload) return (0,core.setFailed)('Upload failed!', upload);
 
     (0,core.info)('STEP 8 of 8: Beginning public access...');
-    const access = await makeFilePublic(bucketName, fileName);
+    const access = await makeFilePublic(bucketName, encodeURIComponent(fileName));
     if (!access) return (0,core.setFailed)('Public access failed!', access);
     
     (0,core.info)('Frontend successfully created.');
@@ -66397,7 +66397,7 @@ const updateStaticFrontend = async (folderPath, websiteName, location, config) =
     let fileName = generateId();
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
     if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
-    else fileName = encodeURIComponent(`${packageConfig?.name}-${packageConfig?.version}`);
+    else fileName = `${packageConfig?.name}-${packageConfig?.version}`;
 
     (0,core.info)('STEP 2 of 4: Beginning archive...');
     const archivedFile = await archiveFileZip(folderPath);
@@ -66408,7 +66408,7 @@ const updateStaticFrontend = async (folderPath, websiteName, location, config) =
     if (!upload) return (0,core.setFailed)('Upload failed!', upload);
 
     (0,core.info)('STEP 4 of 4: Beginning public access...');
-    const access = await makeFilePublic(bucketName, fileName);
+    const access = await makeFilePublic(bucketName, encodeURIComponent(fileName));
     if (!access) return (0,core.setFailed)('Public access failed!', access);
     
     (0,core.info)('Frontend successfully created.');
