@@ -66391,6 +66391,8 @@ const createStaticFrontend = async (folderPath, websiteName, location, config) =
 const updateStaticFrontend = async (folderPath, websiteName, location, config) => {
     console.time();
 
+    const bucketName = `${config.project_id}-${websiteName}`;
+
     (0,core.info)('STEP 1 of 4: Beginning JSON Config retrieval attempt...');
     let fileName = generateId();
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
