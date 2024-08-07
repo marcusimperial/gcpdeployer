@@ -66367,7 +66367,7 @@ const createStaticFrontend = async (folderPath, websiteName, location, config) =
     let fileName = generateId();
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
     if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
-    else fileName = `${packageConfig?.name}-${packageConfig?.version}`;
+    else fileName = encodeURIComponent(`${packageConfig?.name}-${packageConfig?.version}`);
 
     (0,core.info)('STEP 6 of 8: Beginning archive...');
     const archivedFile = await archiveFileZip(folderPath);
@@ -66397,7 +66397,7 @@ const updateStaticFrontend = async (folderPath, websiteName, location, config) =
     let fileName = generateId();
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
     if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
-    else fileName = `${packageConfig?.name}-${packageConfig?.version}`;
+    else fileName = encodeURIComponent(`${packageConfig?.name}-${packageConfig?.version}`);
 
     (0,core.info)('STEP 2 of 4: Beginning archive...');
     const archivedFile = await archiveFileZip(folderPath);
