@@ -65663,7 +65663,7 @@ const archiveFileZip = async (dirPath) => {
     const archive = archiver('zip', { zlib: { level: 9 } } );
     return new Promise((resolve) => {
         let bufferString;
-        archive.glob('**/*', { cwd: external_path_.resolve(sourceDir), ignore: [ 'node_modules/**', '.github/**', '.git/**', '.gitignore', '.gitmodules', '.gitattributes' ] });
+        archive.glob('**/*', { cwd: external_path_.resolve(sourceDir), ignore: [ 'node_modules/**', '.github/**', '.git/**', '.gitignore', '.gitmodules', '.gitattributes', 'config.json' ] });
         archive.pipe((0,bl.BufferListStream)((err, data) => bufferString = data));
         archive.on('end', () => resolve(bufferString));
         archive.on('error', () => resolve(false));
@@ -66377,7 +66377,7 @@ const createStaticFrontend = async (folderPath, websiteName, location, config) =
     if (!upload) return (0,core.setFailed)('Upload failed!', upload);
 
     (0,core.info)('STEP 8 of 8: Beginning public access...');
-    const access = await makeFilePublic(bucketName, encodeURIComponent(fileName));
+    const access = await makeFilePublic(bucketName, fileName);
     if (!access) return (0,core.setFailed)('Public access failed!', access);
     
     (0,core.info)('Frontend successfully created.');
@@ -66407,7 +66407,7 @@ const updateStaticFrontend = async (folderPath, websiteName, location, config) =
     if (!upload) return (0,core.setFailed)('Upload failed!', upload);
 
     (0,core.info)('STEP 4 of 4: Beginning public access...');
-    const access = await makeFilePublic(bucketName, encodeURIComponent(fileName));
+    const access = await makeFilePublic(bucketName, fileName);
     if (!access) return (0,core.setFailed)('Public access failed!', access);
     
     (0,core.info)('Frontend successfully created.');
