@@ -65796,9 +65796,8 @@ const uploadFile = async (bufferCont, sysConfig) => {
 const uploadZipFile = async (bufferCont, bucket, name) => {
     try {
         const storageBucketReference = storage.bucket(bucket);
-        const fileName = `${name}.zip`;
-        await storageBucketReference.file(fileName).save(bufferCont);
-        return fileName;
+        await storageBucketReference.file(name).save(bufferCont);
+        return name;
     } catch (e) {
         console.error(e);
         return false;
@@ -66364,10 +66363,10 @@ const createStaticFrontend = async (folderPath, websiteName, location, config) =
     if (!mapping) return (0,core.setFailed)('Mapping creation failed!', mapping);
 
     (0,core.info)('STEP 5 of 8: Beginning JSON Config retrieval attempt...');
-    let fileName = generateId();
+    let fileName = `${generateId()}.zip`;
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
     if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
-    else fileName = `${packageConfig?.name}-${packageConfig?.version}`;
+    else fileName = `${packageConfig?.name}-${packageConfig?.version}.zip`;
 
     (0,core.info)('STEP 6 of 8: Beginning archive...');
     const archivedFile = await archiveFileZip(folderPath);
@@ -66394,10 +66393,10 @@ const updateStaticFrontend = async (folderPath, websiteName, location, config) =
     const bucketName = `${config.project_id}-${websiteName}`;
 
     (0,core.info)('STEP 1 of 4: Beginning JSON Config retrieval attempt...');
-    let fileName = generateId();
+    let fileName = `${generateId()}.zip`;
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
     if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
-    else fileName = `${packageConfig?.name}-${packageConfig?.version}`;
+    else fileName = `${packageConfig?.name}-${packageConfig?.version}.zip`;
 
     (0,core.info)('STEP 2 of 4: Beginning archive...');
     const archivedFile = await archiveFileZip(folderPath);
