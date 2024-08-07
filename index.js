@@ -65697,20 +65697,23 @@ const checkFileExists = async (path = '') => {
     try {
         await (0,promises_namespaceObject.access)(path);
         return true;
-    } catch {
+    } catch (e) {
+        console.error(e);
         return false;
     }
 };
 
 const readJSONFile = async (filePath) => {
     try {
-        const exists = await checkFileExists(filePath)
-        if (!exists) return false
+        (0,core.info)(external_path_.resolve(filePath))
+        const exists = await checkFileExists(filePath);
+        if (!exists) return false;
 
-        const fileContent = await fs.readFile(filePath, 'utf-8')
+        const fileContent = await (0,promises_namespaceObject.readFile)(filePath, 'utf-8')
         const jsonData = JSON.parse(fileContent)
         return jsonData
     } catch (error) {
+        console.error(error);
         return false
     }
 }
