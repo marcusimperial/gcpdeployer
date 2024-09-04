@@ -65943,7 +65943,7 @@ const createBuild = async (objectFileName, defaultLocation, sysConfig) => {
                 steps: [
                     {
                         name: 'gcr.io/k8s-skaffold/pack',
-                        args: ['pack', 'build', imagePath, '--builder', 'gcr.io/buildpacks/builder', '--no-cache']
+                        args: ['pack', 'build', imagePath, '--builder', 'gcr.io/buildpacks/builder', '--clear-cache']
                     }
                 ],
                 images: [ imagePath ]
