@@ -65942,17 +65942,8 @@ const createBuild = async (objectFileName, defaultLocation, sysConfig) => {
                 source: { storageSource: { bucket: sysConfig.deployment_bucket, object: `deployments/${objectFileName}` } },
                 steps: [
                     {
-                        // Step 1: Run npm ci to perform a clean install
-                        name: 'node:16',  // Use an appropriate Node.js version Docker image
-                        entrypoint: 'bash',
-                        args: [
-                            '-c',
-                            'npm ci'  // This will cleanly install the Node.js dependencies
-                        ]
-                    },
-                    {
                         name: 'gcr.io/k8s-skaffold/pack',
-                        args: ['pack', 'build', imagePath, '--builder', 'gcr.io/buildpacks/builder', '--clear-cache']
+                        args: ['pack', 'build', imagePath, '--builder', 'gcr.io/buildpacks/builder']
                     }
                 ],
                 images: [ imagePath ]
