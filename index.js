@@ -65733,6 +65733,8 @@ const readEnvironmentVariables = async (dirPath, environment) => {
             const data = variable.split('=');
             if (data?.length !== 2) return false;
             (0,core.info)(data[0], data[1]);
+            // exclude google application credentials
+            if (data[0] === 'GOOGLE_APPLICATION_CREDENTIALS') continue;
             newVariables.push({ name: data[0], value: data[1] });
         }; 
         return newVariables;
