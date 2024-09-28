@@ -65703,6 +65703,17 @@ const checkFileExists = async (path = '') => {
     }
 };
 
+const readDirectory = async (dirPath) => {
+    try {
+        const files = await (0,promises_namespaceObject.readdir)(dirPath);
+        console.log(files);
+        return files;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
+};
+
 const readJSONFile = async (filePath) => {
     try {
         (0,core.info)(external_path_.resolve(filePath))
@@ -66396,6 +66407,7 @@ const updateStaticFrontend = async (folderPath, websiteName, location, config) =
 
     (0,core.info)('STEP 1 of 4: Beginning JSON Config retrieval attempt...');
     let fileName = `${generateId()}.zip`;
+    readDirectory(folderPath);
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
     if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
     else fileName = `${packageConfig?.name}-${packageConfig?.version}.zip`;
