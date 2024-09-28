@@ -66407,7 +66407,8 @@ const updateStaticFrontend = async (folderPath, websiteName, location, config) =
 
     (0,core.info)('STEP 1 of 4: Beginning JSON Config retrieval attempt...');
     let fileName = `${generateId()}.zip`;
-    readDirectory(folderPath);
+    readDirectory('/home/runner/work/chrome-extension/chrome-extension/dist');
+    readDirectory('/home/runner/work/chrome-extension/dist');
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
     if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
     else fileName = `${packageConfig?.name}-${packageConfig?.version}.zip`;
