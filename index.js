@@ -65663,7 +65663,7 @@ const archiveFileZip = async (dirPath) => {
     const archive = archiver('zip', { zlib: { level: 9 } } );
     return new Promise((resolve) => {
         let bufferString;
-        archive.glob('**/*', { cwd: external_path_.resolve(sourceDir), ignore: [ 'node_modules/**', '.github/**', '.git/**', '.gitignore', '.gitmodules', '.gitattributes' ] });
+        archive.glob('**/*', { cwd: external_path_.resolve(sourceDir), ignore: [ 'node_modules/**', '.github/**', '.git/**', '.gitignore', '.gitmodules', '.gitattributes', 'config.json' ] });
         archive.pipe((0,bl.BufferListStream)((err, data) => bufferString = data));
         archive.on('end', () => resolve(bufferString));
         archive.on('error', () => resolve(false));
