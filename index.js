@@ -66003,8 +66003,8 @@ const createService = async (serviceName, image, envVariables = [], defaultLocat
                 ingress: 'INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER',
                 template: { 
                     serviceAccount, 
-                    containers: [ { image, env: envVariables, volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] }],
-                    volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }], 
+                    containers: [ { image, env: envVariables, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
+                    ...databaseConnectionId && { volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] }, 
                     scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 }
                 }            
             },
@@ -66034,10 +66034,10 @@ const updateService = async (serviceName, image, envVariables = [], defaultLocat
                 ingress: 'INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER',
                 template: { 
                     serviceAccount, 
-                    containers: [ { image, env: envVariables, volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] }],
-                    volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }],
+                    containers: [ { image, env: envVariables, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
+                    ...databaseConnectionId && { volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] }, 
                     scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 }
-                }            
+                }              
             }
         };
 
@@ -66468,7 +66468,6 @@ const runApp = async () => {
             const variables = await readEnvironmentVariables(path, environment);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             // get database
-            if (!database) return (0,core.setFailed)('Err: Missing database connection.');
             return createBackend(path, name, location, variables, config, database, instances);
         } else if (operation === 'update' && type === 'backend') {
             const environment = (0,core.getInput)('environment');
@@ -66476,7 +66475,6 @@ const runApp = async () => {
             // get variables
             const variables = await readEnvironmentVariables(path, environment);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
-            if (!database) return (0,core.setFailed)('Err: Missing database connection.');
             return updateBackend(path, name, location, variables, config, database, instances);
         } return (0,core.setFailed)('Err: Invalid operation and/or deployment types.');
     } catch (e) {
