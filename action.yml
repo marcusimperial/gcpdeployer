@@ -30,7 +30,7 @@ inputs:
     required: true
   database:
     description: "Database name"
-    required: true
+    required: false
   environment:
     description: "Environment name"
     required: false
