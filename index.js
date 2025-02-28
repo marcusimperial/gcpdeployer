@@ -65960,9 +65960,11 @@ const createBuild = async (objectFileName, defaultLocation, sysConfig) => {
                     }
                 ],
                 images: [ imagePath ],
-                serviceAccount: serviceAccount
+                serviceAccount: serviceAccount,
+                options: { logging: 'CLOUD_LOGGING_ONLY' }
             },
-            serviceAccount: serviceAccount
+            serviceAccount: serviceAccount,
+            mode
         };
         (0,core.info)('passed step');
 
