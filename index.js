@@ -65937,7 +65937,7 @@ const getClient = async () => {
 
 // create Build
 
-const createBuild = async (objectFileName, defaultLocation, sysConfig) => {
+const createBuild = async (objectFileName, defaultLocation, sysConfig, envVariables) => {
     if (!objectFileName || !defaultLocation) return false;
     (0,core.info)(`create build, ${objectFileName}, ${defaultLocation}, ${sysConfig.deployment_bucket}`);
     try {
@@ -65956,7 +65956,8 @@ const createBuild = async (objectFileName, defaultLocation, sysConfig) => {
                 steps: [
                     {
                         name: 'gcr.io/k8s-skaffold/pack',
-                        args: ['pack', 'build', imagePath, '--builder', 'gcr.io/buildpacks/builder']
+                        args: ['pack', 'build', imagePath, '--builder', 'gcr.io/buildpacks/builder'],
+                        env: envVariables.map(({ name, value }) => `${name}=${value}`)
                     }
                 ],
                 images: [ imagePath ],
@@ -66220,7 +66221,7 @@ const createBackend = async (folderPath, serviceName, location, envVariables, co
     if (!upload) return (0,core.setFailed)('Upload failed!', upload);
 
     (0,core.info)('STEP 3 of 10: Beginning build creation... (1/3 longrunning - 60%)');
-    const build = await createBuild(upload, location, config);
+    const build = await createBuild(upload, location, config, envVariables);
     if (!build) return (0,core.setFailed)('Build creation failed!', build);
 
     (0,core.info)('STEP 4 of 10: Beginning service creation... (2/3 longrunning - 25%)');
@@ -66268,7 +66269,7 @@ const updateBackend = async (folderPath, serviceName, location, envVariables, co
     if (!upload) return (0,core.setFailed)('Upload failed!', upload);
 
     (0,core.info)('STEP 3 of 5: Beginning build creation... (1/3 longrunning - 70%)');
-    const build = await createBuild(upload, location, config);
+    const build = await createBuild(upload, location, config, envVariables);
     (0,core.info)(build);
     if (!build) return (0,core.setFailed)('Build creation failed!', build);
 
