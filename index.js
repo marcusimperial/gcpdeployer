@@ -65960,7 +65960,8 @@ const createBuild = async (objectFileName, defaultLocation, sysConfig) => {
                     }
                 ],
                 images: [ imagePath ]
-            }
+            },
+            serviceAccount: serviceAccount
         };
         (0,core.info)('passed step');
 
