@@ -65959,7 +65959,8 @@ const createBuild = async (objectFileName, defaultLocation, sysConfig) => {
                         args: ['pack', 'build', imagePath, '--builder', 'gcr.io/buildpacks/builder']
                     }
                 ],
-                images: [ imagePath ]
+                images: [ imagePath ],
+                serviceAccount: serviceAccount
             },
             serviceAccount: serviceAccount
         };
