@@ -65964,7 +65964,6 @@ const createBuild = async (objectFileName, defaultLocation, sysConfig) => {
                 options: { logging: 'CLOUD_LOGGING_ONLY' }
             },
             serviceAccount: serviceAccount,
-            mode
         };
         (0,core.info)('passed step');
 
