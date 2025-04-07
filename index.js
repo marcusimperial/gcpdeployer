@@ -65742,7 +65742,6 @@ const readEnvironmentVariables = async (dirPath, environment) => {
         for (const variable of variables) {
             if (variable.includes('#')) continue;
             const data = variable.split('=');
-            if (data?.length !== 2) return false;
             (0,core.info)(data[0], data[1]);
             // exclude google application credentials
             if (data[0] === 'GOOGLE_APPLICATION_CREDENTIALS') continue;
