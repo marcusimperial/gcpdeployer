@@ -65955,7 +65955,7 @@ const createBuild = async (objectFileName, defaultLocation, sysConfig, envVariab
                 steps: [
                     {
                         name: 'gcr.io/k8s-skaffold/pack',
-                        args: ['pack', 'build', imagePath, '--builder', 'gcr.io/buildpacks/builder'],
+                        args: ['pack', 'build', imagePath, '--builder', 'gcr.io/buildpacks/builder', ...envVariables.map(({ name, value }) => `--env=${name}=${value}`) ],
                         env: envVariables.map(({ name, value }) => `${name}=${value}`)
                     }
                 ],
