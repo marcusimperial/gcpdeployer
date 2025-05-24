@@ -65731,7 +65731,10 @@ const readJSONFile = async (filePath) => {
 
 const readEnvironmentVariables = async (dirPath, environment) => {
     let newVariables = [];
-    if (environment) newVariables.push({ name: 'NODE_ENV', value: environment });
+    if (environment) {
+        newVariables.push({ name: 'NODE_ENV', value: environment });
+        newVariables.push({ name: 'APP_ENV', value: environment });
+    };
     try {
         const filePath = external_path_.join(dirPath, '.env');
         const fileExists = await checkFileExists(filePath);
