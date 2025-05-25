@@ -38,6 +38,9 @@ inputs:
     description: "Number of instances"
     required: false
     default: 0
+  template: 
+    description: "Template name"
+    required: false
 
 runs:
   using: "node20"

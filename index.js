@@ -65729,12 +65729,15 @@ const readJSONFile = async (filePath) => {
     }
 }
 
-const readEnvironmentVariables = async (dirPath, environment) => {
+const readEnvironmentVariables = async (dirPath, environment, template) => {
     let newVariables = [];
     if (environment) {
-        newVariables.push({ name: 'NODE_ENV', value: environment });
-        newVariables.push({ name: 'APP_ENV', value: environment });
-        newVariables.push({ name: 'NEXT_PUBLIC_APP_ENV', value: environment });
+        if (!template) newVariables.push({ name: 'NODE_ENV', value: environment });
+        else if (template === 'next') {
+            newVariables.push({ name: 'NODE_ENV', value: 'production' });
+            newVariables.push({ name: 'APP_ENV', value: environment });
+            newVariables.push({ name: 'NEXT_PUBLIC_APP_ENV', value: environment })
+        }
     };
     try {
         const filePath = external_path_.join(dirPath, '.env');
@@ -66471,16 +66474,18 @@ const runApp = async () => {
         else if (operation === 'create' && type === 'backend') {
             const environment = (0,core.getInput)('environment');
             const instances = (0,core.getInput)('instances');
+            const template = (0,core.getInput)('template');
             // get variables
-            const variables = await readEnvironmentVariables(path, environment);
+            const variables = await readEnvironmentVariables(path, environment, template);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             // get database
             return createBackend(path, name, location, variables, config, database, instances);
         } else if (operation === 'update' && type === 'backend') {
             const environment = (0,core.getInput)('environment');
             const instances = (0,core.getInput)('instances');
+            const template = (0,core.getInput)('template');
             // get variables
-            const variables = await readEnvironmentVariables(path, environment);
+            const variables = await readEnvironmentVariables(path, environment, template);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             return updateBackend(path, name, location, variables, config, database, instances);
         } return (0,core.setFailed)('Err: Invalid operation and/or deployment types.');
