@@ -65734,6 +65734,7 @@ const readEnvironmentVariables = async (dirPath, environment) => {
     if (environment) {
         newVariables.push({ name: 'NODE_ENV', value: environment });
         newVariables.push({ name: 'APP_ENV', value: environment });
+        newVariables.push({ name: 'NEXT_PUBLIC_APP_ENV', value: environment });
     };
     try {
         const filePath = external_path_.join(dirPath, '.env');
