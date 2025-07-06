@@ -66185,8 +66185,8 @@ const listMappings = async (sysConfig) => {
     }
 };
 
-const createMapping = async (serviceName, backendLink, sysConfig) => {
-    if (!serviceName || !backendLink) return false;
+const createMapping = async (serviceName, subdomain, backendLink, sysConfig) => {
+    if (!serviceName || !subdomain || !backendLink) return false;
     const list = await listMappings(sysConfig);
     if (!list) return false;
     try {
@@ -66196,7 +66196,7 @@ const createMapping = async (serviceName, backendLink, sysConfig) => {
             urlMapResource: {
                 name: sysConfig.load_balancer,
                 pathMatchers: [ ...list?.pathMatchers, { name: `${serviceName}-path`, defaultService: backendLink } ],
-                hostRules: [ ...list?.hostRules, { hosts: [ `${serviceName}.${sysConfig.naked_domain}` ], pathMatcher: `${serviceName}-path` } ]
+                hostRules: [ ...list?.hostRules, { hosts: [ `${subdomain}.${sysConfig.naked_domain}` ], pathMatcher: `${serviceName}-path` } ]
             }
         };
         const [ operation ] = await mappings.patch(config);
@@ -66215,7 +66215,7 @@ const createMapping = async (serviceName, backendLink, sysConfig) => {
 
 
 
-const createBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances) => {
+const createBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances, subdomain) => {
     console.time();
 
     (0,core.info)('STEP 1 of 10: Beginning archive...');
@@ -66251,7 +66251,7 @@ const createBackend = async (folderPath, serviceName, location, envVariables, co
     if (!trackedInstance) return (0,core.setFailed)('Instance tracking failed!', trackedInstance);
 
     (0,core.info)('STEP 9 of 10: Beginning mapping creation...');
-    const mapping = await createMapping(serviceName, instance?.latestResponse?.targetLink, config);
+    const mapping = await createMapping(serviceName, subdomain, instance?.latestResponse?.targetLink, config);
     if (!mapping) return (0,core.setFailed)('Mapping creation failed!', mapping);
 
     (0,core.info)('STEP 10 of 10: Beginning file clean-up...');
@@ -66292,7 +66292,7 @@ const updateBackend = async (folderPath, serviceName, location, envVariables, co
     return true;
 };
 
-const createFrontend = async (folderPath, websiteName, location, config) => {
+const createFrontend = async (folderPath, websiteName, location, config, subdomain) => {
     console.time();
 
     (0,core.info)('STEP 1 OF 9: Beginning source creation...');
@@ -66364,7 +66364,7 @@ const updateFrontend = async (folderPath, websiteName, location, config) => {
     return true;
 };
 
-const createStaticFrontend = async (folderPath, websiteName, location, config) => {
+const createStaticFrontend = async (folderPath, websiteName, location, config, subdomain) => {
     console.time();
 
     const bucketName = `${config.project_id}-${websiteName}`;
@@ -66463,13 +66463,15 @@ const runApp = async () => {
         const name = (0,core.getInput)('name');
         const location = (0,core.getInput)('location');
         const path = (0,core.getInput)('path');
-        console.log(operation, type, name, location, path, 'test', type === 'backend');
+        console.info(operation, type, name, location, path);
         // validate inputs
         if (!operation || !type || !name || !location || !path) return (0,core.setFailed)('Err: Missing inputs.');
+        // use subdomain if defined, otherwise use name
+        const subdomain = (0,core.getInput)('subdomain') || name;
         // handle corresponding process
-        if (operation === 'create' && type === 'frontend') return createFrontend(path, name, location, config);
+        if (operation === 'create' && type === 'frontend') return createFrontend(path, name, location, config, subdomain);
         else if (operation === 'update' && type === 'frontend') return updateFrontend(path, name, location, config);
-        else if (operation === 'create' && type === 'static') return createStaticFrontend(path, name, location, config);
+        else if (operation === 'create' && type === 'static') return createStaticFrontend(path, name, location, config, subdomain);
         else if (operation === 'update' && type === 'static') return updateStaticFrontend(path, name, location, config);
         else if (operation === 'create' && type === 'backend') {
             const environment = (0,core.getInput)('environment');
@@ -66479,7 +66481,7 @@ const runApp = async () => {
             const variables = await readEnvironmentVariables(path, environment, template);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             // get database
-            return createBackend(path, name, location, variables, config, database, instances);
+            return createBackend(path, name, location, variables, config, database, instances, subdomain);
         } else if (operation === 'update' && type === 'backend') {
             const environment = (0,core.getInput)('environment');
             const instances = (0,core.getInput)('instances');
