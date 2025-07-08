@@ -66308,7 +66308,7 @@ const createFrontend = async (folderPath, websiteName, location, config, subdoma
     if (!trackedInstance) return (0,core.setFailed)('Instance tracking failed!', trackedInstance);
 
     (0,core.info)('STEP 4 of 9: Beginning mapping creation...');
-    const mapping = await createMapping(websiteName, instance?.latestResponse?.targetLink, config);
+    const mapping = await createMapping(websiteName, subdomain, instance?.latestResponse?.targetLink, config);
     if (!mapping) return (0,core.setFailed)('Mapping creation failed!', mapping);
 
     (0,core.info)('STEP 5 of 9: Beginning file retrieval...');
