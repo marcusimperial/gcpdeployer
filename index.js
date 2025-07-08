@@ -66300,7 +66300,7 @@ const createFrontend = async (folderPath, websiteName, location, config, subdoma
     if (!source) return (0,core.setFailed)('Source creation failed!', source);
 
     (0,core.info)('STEP 2 of 9: Beginning instance creation...');
-    const instance = await createFrontendInstance(websiteName, `${config.project_id}-${websiteName}`, config);
+    const instance = await createFrontendInstance(websiteName, websiteName, config);
     if (!instance) return (0,core.setFailed)('Instance creation failed!', instance);
 
     (0,core.info)('STEP 3 of 9: Tracking instance creation...');
@@ -66312,25 +66312,25 @@ const createFrontend = async (folderPath, websiteName, location, config, subdoma
     if (!mapping) return (0,core.setFailed)('Mapping creation failed!', mapping);
 
     (0,core.info)('STEP 5 of 9: Beginning file retrieval...');
-    const currentFiles = await listFiles(`${config.project_id}-${websiteName}`);
+    const currentFiles = await listFiles(websiteName);
     if (!currentFiles) return (0,core.setFailed)('File retrieval failed!', currentFiles);
 
     (0,core.info)('STEP 6 of 9: Beginning file clean-up...');
-    const deletedFiles = await deleteFiles(currentFiles, `${config.project_id}-${websiteName}`);
+    const deletedFiles = await deleteFiles(currentFiles, websiteName);
     if (!deletedFiles) return (0,core.setFailed)('File clean-up failed!', deletedFiles);
 
     (0,core.info)('STEP 7 of 9: Beginning file upload...');
-    const uploadedFiles = await deployFiles(folderPath, (await listFolder(folderPath)), `${config.project_id}-${websiteName}`);
+    const uploadedFiles = await deployFiles(folderPath, (await listFolder(folderPath)), websiteName);
     if (!uploadedFiles) return (0,core.setFailed)('FIle upload failed!', uploadedFiles);
 
     (0,core.info)('STEP 8 of 9: Beginning public access...');
-    const access = await makeFrontendPublic(`${config.project_id}-${websiteName}`);
+    const access = await makeFrontendPublic(websiteName);
     if (!access) return (0,core.setFailed)('Public access failed!', access);
 
     (0,core.info)('STEP 9 of 9: Beginning metadata set...');
     const metadata = await setMetadata({ 
         website: { mainPageSuffix: 'index.html', notFoundPage: 'index.html' }
-    }, `${config.project_id}-${websiteName}`);
+    }, websiteName);
     if (!metadata) return (0,core.setFailed)('Metadata set failed!', metadata);
 
     (0,core.info)('Frontend successfully created.');
