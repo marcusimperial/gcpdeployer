@@ -66296,7 +66296,7 @@ const createFrontend = async (folderPath, websiteName, location, config, subdoma
     console.time();
 
     (0,core.info)('STEP 1 OF 9: Beginning source creation...');
-    const source = await createBucket(`${config.project_id}-${websiteName}`);
+    const source = await createBucket(websiteName);
     if (!source) return (0,core.setFailed)('Source creation failed!', source);
 
     (0,core.info)('STEP 2 of 9: Beginning instance creation...');
