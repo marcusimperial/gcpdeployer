@@ -66342,21 +66342,21 @@ const updateFrontend = async (folderPath, websiteName, location, config) => {
     console.time();
 
     (0,core.info)('STEP 1 of 4: Beginning file retrieval...');
-    const currentFiles = await listFiles(`${config.project_id}-${websiteName}`);
+    const currentFiles = await listFiles(websiteName);
     if (!currentFiles) return (0,core.setFailed)('File retrieval failed!', currentFiles);
 
     (0,core.info)('STEP 2 of 4: Beginning file clean-up...');
-    const deletedFiles = await deleteFiles(currentFiles, `${config.project_id}-${websiteName}`);
+    const deletedFiles = await deleteFiles(currentFiles, websiteName);
     if (!deletedFiles) return (0,core.setFailed)('File clean-up failed!', deletedFiles);
 
     (0,core.info)('STEP 3 of 4: Beginning file upload...');
-    const uploadedFiles = await deployFiles(folderPath, (await listFolder(folderPath)), `${config.project_id}-${websiteName}`);
+    const uploadedFiles = await deployFiles(folderPath, (await listFolder(folderPath)), websiteName);
     if (!uploadedFiles) return (0,core.setFailed)('FIle upload failed!', uploadedFiles);
 
     (0,core.info)('STEP 4 of 4: Beginning metadata set...');
     const metadata = await setMetadata({ 
         website: { mainPageSuffix: 'index.html', notFoundPage: 'index.html' }
-    }, `${config.project_id}-${websiteName}`);
+    }, websiteName);
     if (!metadata) return (0,core.setFailed)('Metadata set failed!', metadata);
 
     (0,core.info)('Frontend successfully updated.');
