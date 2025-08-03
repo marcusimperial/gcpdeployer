@@ -66048,7 +66048,7 @@ const updateService = async (serviceName, image, envVariables = [], defaultLocat
                     containers: [ { image, env: envVariables, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
                     ...databaseConnectionId && { volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] }, 
                     scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 },
-                    ...vpcConnectorId && { vpcAccess: { connector: vpcConnectorId } }
+                    ...vpcConnectorId && { vpcAccess: { connector: `projects/${project}/locations/${defaultLocation}/connectors/${vpcConnectorId}` } }
                 }              
             }
         };
