@@ -66003,7 +66003,7 @@ const run_getClient = async () => {
 
 // createService
 
-const createService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId, instances) => {
+const createService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId, instances, vpcConnectorId) => {
     if (!serviceName || !image) return false;
     try {
         const { serviceAccount, project } = await run_getClient();
@@ -66015,7 +66015,8 @@ const createService = async (serviceName, image, envVariables = [], defaultLocat
                     serviceAccount, 
                     containers: [ { image, env: envVariables, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
                     ...databaseConnectionId && { volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] }, 
-                    scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 }
+                    scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 },
+                    ...vpcConnectorId && { vpcAccess: { connector: vpcConnectorId } }
                 }            
             },
             serviceId: serviceName
@@ -66034,7 +66035,7 @@ const createService = async (serviceName, image, envVariables = [], defaultLocat
 
 // updateService
 
-const updateService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId, instances) => {
+const updateService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId, instances, vpcConnectorId) => {
     if (!serviceName || !image) return false;
     try {
         const { serviceAccount, project } = await run_getClient();
@@ -66046,7 +66047,8 @@ const updateService = async (serviceName, image, envVariables = [], defaultLocat
                     serviceAccount, 
                     containers: [ { image, env: envVariables, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
                     ...databaseConnectionId && { volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] }, 
-                    scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 }
+                    scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 },
+                    ...vpcConnectorId && { vpcAccess: { connector: vpcConnectorId } }
                 }              
             }
         };
@@ -66215,7 +66217,7 @@ const createMapping = async (serviceName, subdomain, backendLink, sysConfig) => 
 
 
 
-const createBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances, subdomain) => {
+const createBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances, subdomain, vpcConnectorId) => {
     console.time();
 
     (0,core.info)('STEP 1 of 10: Beginning archive...');
@@ -66231,7 +66233,7 @@ const createBackend = async (folderPath, serviceName, location, envVariables, co
     if (!build) return (0,core.setFailed)('Build creation failed!', build);
 
     (0,core.info)('STEP 4 of 10: Beginning service creation... (2/3 longrunning - 25%)');
-    const service = await createService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId, instances);
+    const service = await createService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId, instances, vpcConnectorId);
     if (!service) return (0,core.setFailed)('Service creation failed!', service);
 
     (0,core.info)('STEP 5 of 10: Beginning public access...');
@@ -66263,7 +66265,7 @@ const createBackend = async (folderPath, serviceName, location, envVariables, co
     return true;
 };
 
-const updateBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances) => {
+const updateBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances, vpcConnectorId) => {
     console.time();
 
     (0,core.info)('STEP 1 of 5: Beginning archive...');
@@ -66280,7 +66282,7 @@ const updateBackend = async (folderPath, serviceName, location, envVariables, co
     if (!build) return (0,core.setFailed)('Build creation failed!', build);
 
     (0,core.info)('STEP 4 of 5: Beginning service creation... (2/2 longrunning - 30%)');
-    const service = await updateService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId, instances);
+    const service = await updateService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId, instances, vpcConnectorId);
     if (!service) return (0,core.setFailed)('Service creation failed!', service);
 
     (0,core.info)('STEP 5 of 5: Beginning file clean-up...');
@@ -66477,19 +66479,21 @@ const runApp = async () => {
             const environment = (0,core.getInput)('environment');
             const instances = (0,core.getInput)('instances');
             const template = (0,core.getInput)('template');
+            const vpc_connector = (0,core.getInput)('vpc_connector');
             // get variables
             const variables = await readEnvironmentVariables(path, environment, template);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             // get database
-            return createBackend(path, name, location, variables, config, database, instances, subdomain);
+            return createBackend(path, name, location, variables, config, database, instances, subdomain, vpc_connector);
         } else if (operation === 'update' && type === 'backend') {
             const environment = (0,core.getInput)('environment');
             const instances = (0,core.getInput)('instances');
             const template = (0,core.getInput)('template');
+            const vpc_connector = (0,core.getInput)('vpc_connector');
             // get variables
             const variables = await readEnvironmentVariables(path, environment, template);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
-            return updateBackend(path, name, location, variables, config, database, instances);
+            return updateBackend(path, name, location, variables, config, database, instances, vpc_connector);
         } return (0,core.setFailed)('Err: Invalid operation and/or deployment types.');
     } catch (e) {
         console.error(e);

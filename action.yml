@@ -34,6 +34,9 @@ inputs:
   database:
     description: "Database name"
     required: false
+  vpc_connector:
+    description: "VPC connector name"
+    required: false
   environment:
     description: "Environment name"
     required: false
