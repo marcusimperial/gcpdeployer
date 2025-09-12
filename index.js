@@ -65883,7 +65883,7 @@ const listFiles = async (bucket) => {
 const setMetadata = async (metadata, bucket) => {
     if (!metadata) return false;
     try {
-        const operation = await storage.bucket(bucket).setMetadata(metadata);
+        const operation = await storage.bucket(bucket).setMetadata(metadata, {});
         if (!operation) return false;
         return operation;
     } catch (e) {
@@ -66369,45 +66369,39 @@ const updateFrontend = async (folderPath, websiteName, location, config) => {
 const createStaticFrontend = async (folderPath, websiteName, location, config, subdomain) => {
     console.time();
 
-    (0,core.info)('STEP 1 OF 9: Beginning source creation...');
+    (0,core.info)('STEP 1 OF 8: Beginning source creation...');
     const source = await createBucket(websiteName);
     if (!source) return (0,core.setFailed)('Source creation failed!', source);
 
-    (0,core.info)('STEP 2 of 9: Beginning instance creation...');
+    (0,core.info)('STEP 2 of 8: Beginning instance creation...');
     const instance = await createFrontendInstance(websiteName, websiteName, config);
     if (!instance) return (0,core.setFailed)('Instance creation failed!', instance);
 
-    (0,core.info)('STEP 3 of 9: Tracking instance creation...');
+    (0,core.info)('STEP 3 of 8: Tracking instance creation...');
     const trackedInstance = await awaitInstance(instance?.name, config);
     if (!trackedInstance) return (0,core.setFailed)('Instance tracking failed!', trackedInstance);
 
-    (0,core.info)('STEP 4 of 9: Beginning mapping creation...');
+    (0,core.info)('STEP 4 of 8: Beginning mapping creation...');
     const mapping = await createMapping(websiteName, subdomain, instance?.latestResponse?.targetLink, config);
     if (!mapping) return (0,core.setFailed)('Mapping creation failed!', mapping);
 
-    (0,core.info)('STEP 5 of 9: Beginning JSON Config retrieval attempt...');
+    (0,core.info)('STEP 5 of 8: Beginning JSON Config retrieval attempt...');
     let fileName = `${generateId()}.zip`;
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
     if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
     else fileName = `${packageConfig?.name}-${packageConfig?.version}.zip`;
 
-    (0,core.info)('STEP 6 of 9: Beginning archive...');
+    (0,core.info)('STEP 6 of 8: Beginning archive...');
     const archivedFile = await archiveFileZip(folderPath);
     if (!archivedFile) return (0,core.setFailed)('Archive failed!', archivedFile);
 
-    (0,core.info)('STEP 7 of 9: Beginning file upload...');
+    (0,core.info)('STEP 7 of 8: Beginning file upload...');
     const upload = await uploadZipFile(archivedFile, websiteName, fileName);
     if (!upload) return (0,core.setFailed)('Upload failed!', upload);
 
-    (0,core.info)('STEP 8 of 9: Beginning public access...');
+    (0,core.info)('STEP 8 of 8: Beginning public access...');
     const access = await makeFilePublic(websiteName, fileName);
     if (!access) return (0,core.setFailed)('Public access failed!', access);
-
-    (0,core.info)('STEP 9 of 9: Beginning metadata set...');
-    const metadata = await setMetadata({ 
-        website: { mainPageSuffix: fileName, notFoundPage: fileName }
-    }, websiteName);
-    if (!metadata) return (0,core.setFailed)('Metadata set failed!', metadata);
     
     (0,core.info)('Frontend successfully created.');
     (0,core.info)(`The file is available at ${subdomain}.${config?.naked_domain} or ${subdomain}.${config?.naked_domain}/${fileName}.`);
@@ -66419,29 +66413,23 @@ const createStaticFrontend = async (folderPath, websiteName, location, config, s
 const updateStaticFrontend = async (folderPath, websiteName, location, config, subdomain) => {
     console.time();
 
-    (0,core.info)('STEP 1 of 5: Beginning JSON Config retrieval attempt...');
+    (0,core.info)('STEP 1 of 4: Beginning JSON Config retrieval attempt...');
     let fileName = `${generateId()}.zip`;
     const packageConfig = await readJSONFile(`${folderPath}/config.json`);
     if (!packageConfig) return (0,core.info)('No JSON config file found, using generic file name instead.');
     else fileName = `${packageConfig?.name}-${packageConfig?.version}.zip`;
 
-    (0,core.info)('STEP 2 of 5: Beginning archive...');
+    (0,core.info)('STEP 2 of 4: Beginning archive...');
     const archivedFile = await archiveFileZip(folderPath);
     if (!archivedFile) return (0,core.setFailed)('Archive failed!', archivedFile);
 
-    (0,core.info)('STEP 3 of 5: Beginning file upload...');
+    (0,core.info)('STEP 3 of 4: Beginning file upload...');
     const upload = await uploadZipFile(archivedFile, websiteName, fileName);
     if (!upload) return (0,core.setFailed)('Upload failed!', upload);
 
-    (0,core.info)('STEP 4 of 5: Beginning public access...');
+    (0,core.info)('STEP 4 of 4: Beginning public access...');
     const access = await makeFilePublic(websiteName, fileName);
     if (!access) return (0,core.setFailed)('Public access failed!', access);
-
-    (0,core.info)('STEP 5 of 5: Beginning metadata set...');
-    const metadata = await setMetadata({ 
-        website: { mainPageSuffix: fileName, notFoundPage: fileName }
-    }, websiteName);
-    if (!metadata) return (0,core.setFailed)('Metadata set failed!', metadata);
     
     (0,core.info)('Frontend successfully created.');
     (0,core.info)(`The file is available at ${subdomain}.${config?.naked_domain} or ${subdomain}.${config?.naked_domain}/${fileName}.`);
