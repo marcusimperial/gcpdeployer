@@ -66013,7 +66013,7 @@ const createService = async (serviceName, image, envVariables = [], defaultLocat
                 ingress: 'INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER',
                 template: { 
                     serviceAccount, 
-                    timeout: '900s',
+                    timeout: { seconds: 900 },
                     containers: [ { image, env: envVariables, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
                     ...databaseConnectionId && { volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] }, 
                     scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 },
@@ -66046,7 +66046,7 @@ const updateService = async (serviceName, image, envVariables = [], defaultLocat
                 ingress: 'INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER',
                 template: { 
                     serviceAccount, 
-                    timeout: '900s',
+                    timeout: { seconds: 900 },
                     containers: [ { image, env: envVariables, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
                     ...databaseConnectionId && { volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] }, 
                     scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 },
