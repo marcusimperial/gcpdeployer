@@ -47,6 +47,9 @@ inputs:
   template: 
     description: "Template name"
     required: false
+  env_variables:
+    description: "Multiline KEY=VALUE environment variables"
+    required: false
 
 runs:
   using: "node20"

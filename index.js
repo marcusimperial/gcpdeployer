@@ -65729,34 +65729,65 @@ const readJSONFile = async (filePath) => {
     }
 }
 
-const readEnvironmentVariables = async (dirPath, environment, template) => {
-    let newVariables = [];
-    if (environment) {
-        if (!template) newVariables.push({ name: 'NODE_ENV', value: environment });
-        else if (template === 'next') {
-            newVariables.push({ name: 'NODE_ENV', value: 'production' });
-            newVariables.push({ name: 'APP_ENV', value: environment });
-            newVariables.push({ name: 'NEXT_PUBLIC_APP_ENV', value: environment })
-        }
-    };
+const parseEnvironmentLine = (line = '', source = 'env') => {
+    const value = line.trim();
+    if (!value || value.startsWith('#')) return null;
+
+    const separatorIndex = value.indexOf('=');
+    if (separatorIndex < 1) throw new Error(`Invalid ${source} variable format: "${line}". Expected KEY=VALUE.`);
+
+    const name = value.slice(0, separatorIndex).trim();
+    if (!name) throw new Error(`Invalid ${source} variable format: "${line}". Variable name is missing.`);
+
+    const parsedValue = value.slice(separatorIndex + 1);
+    if (name === 'GOOGLE_APPLICATION_CREDENTIALS') return null;
+
+    return { name, value: parsedValue };
+};
+
+const parseEnvironmentEntries = (content = '', source = 'env') => {
+    const variables = content.split(/\r?\n|\r|\n/g);
+    const parsedVariables = [];
+
+    for (const variable of variables) {
+        const parsedVariable = parseEnvironmentLine(variable, source);
+        if (!parsedVariable) continue;
+        parsedVariables.push(parsedVariable);
+    }
+
+    return parsedVariables;
+};
+
+const readEnvironmentVariables = async (dirPath, environment, template, envVariablesInput = '') => {
     try {
+        const variablesMap = new Map();
+
+        if (environment) {
+            if (!template) variablesMap.set('NODE_ENV', environment);
+            else if (template === 'next') {
+                variablesMap.set('NODE_ENV', 'production');
+                variablesMap.set('APP_ENV', environment);
+                variablesMap.set('NEXT_PUBLIC_APP_ENV', environment);
+            }
+        }
+
         const filePath = external_path_.join(dirPath, '.env');
         const fileExists = await checkFileExists(filePath);
-        if (!fileExists) return newVariables;
-        (0,core.info)('env file path', filePath)
-        const file = await (0,promises_namespaceObject.readFile)(filePath, 'utf-8');
-        const variables = file.split(/\r?\n|\r|\n/g);
-        for (const variable of variables) {
-            if (variable.includes('#')) continue;
-            const data = variable.split('=');
-            (0,core.info)(data[0], data[1]);
-            // exclude google application credentials
-            if (data[0] === 'GOOGLE_APPLICATION_CREDENTIALS') continue;
-            newVariables.push({ name: data[0], value: data[1] });
-        }; 
-        return newVariables;
+        if (fileExists) {
+            (0,core.info)(`env file path ${filePath}`);
+            const file = await (0,promises_namespaceObject.readFile)(filePath, 'utf-8');
+            const fileVariables = parseEnvironmentEntries(file, '.env');
+            for (const variable of fileVariables) variablesMap.set(variable.name, variable.value);
+        }
+
+        if (envVariablesInput) {
+            const inputVariables = parseEnvironmentEntries(envVariablesInput, 'env_variables input');
+            for (const variable of inputVariables) variablesMap.set(variable.name, variable.value);
+        }
+
+        return Array.from(variablesMap.entries()).map(([name, value]) => ({ name, value }));
     } catch (e) {
-        (0,core.info)(e);
+        (0,core.info)(e?.message || `${e}`);
         return false;
     }
 };
@@ -66478,8 +66509,9 @@ const runApp = async () => {
             const instances = (0,core.getInput)('instances');
             const template = (0,core.getInput)('template');
             const vpc_connector = (0,core.getInput)('vpc_connector');
+            const env_variables = (0,core.getInput)('env_variables');
             // get variables
-            const variables = await readEnvironmentVariables(path, environment, template);
+            const variables = await readEnvironmentVariables(path, environment, template, env_variables);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             // get database
             return createBackend(path, name, location, variables, config, database, instances, subdomain, vpc_connector);
@@ -66488,8 +66520,9 @@ const runApp = async () => {
             const instances = (0,core.getInput)('instances');
             const template = (0,core.getInput)('template');
             const vpc_connector = (0,core.getInput)('vpc_connector');
+            const env_variables = (0,core.getInput)('env_variables');
             // get variables
-            const variables = await readEnvironmentVariables(path, environment, template);
+            const variables = await readEnvironmentVariables(path, environment, template, env_variables);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
             return updateBackend(path, name, location, variables, config, database, instances, vpc_connector);
         } return (0,core.setFailed)('Err: Invalid operation and/or deployment types.');
