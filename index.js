@@ -65792,6 +65792,62 @@ const readEnvironmentVariables = async (dirPath, environment, template, envVaria
     }
 };
 
+const parseSecretLine = (line = '', source = 'secrets') => {
+    const value = line.trim();
+    if (!value || value.startsWith('#')) return null;
+
+    const separatorIndex = value.indexOf('=');
+    if (separatorIndex < 1) throw new Error(`Invalid ${source} variable format: "${line}". Expected SECRET_NAME=secret-id:version.`);
+
+    const name = value.slice(0, separatorIndex).trim();
+    if (!name) throw new Error(`Invalid ${source} variable format: "${line}". Secret name is missing.`);
+
+    const secretRef = value.slice(separatorIndex + 1).trim();
+    const [secretId, version] = secretRef.split(':');
+    
+    if (!secretId) throw new Error(`Invalid ${source} variable format: "${line}". Secret ID is missing.`);
+
+    return { name, secretId, version: version || 'latest' };
+};
+
+const parseSecretEntries = (content = '', source = 'secrets') => {
+    const secrets = content.split(/\r?\n|\r|\n/g);
+    const parsedSecrets = [];
+
+    for (const secret of secrets) {
+        const parsedSecret = parseSecretLine(secret, source);
+        if (!parsedSecret) continue;
+        parsedSecrets.push(parsedSecret);
+    }
+
+    return parsedSecrets;
+};
+
+const readSecrets = async (dirPath, secretsInput = '') => {
+    try {
+        const secretsList = [];
+
+        const filePath = external_path_.join(dirPath, '.secrets');
+        const fileExists = await checkFileExists(filePath);
+        if (fileExists) {
+            (0,core.info)(`secrets file path ${filePath}`);
+            const file = await (0,promises_namespaceObject.readFile)(filePath, 'utf-8');
+            const fileSecrets = parseSecretEntries(file, '.secrets');
+            secretsList.push(...fileSecrets);
+        }
+
+        if (secretsInput) {
+            const inputSecrets = parseSecretEntries(secretsInput, 'secrets_variables input');
+            secretsList.push(...inputSecrets);
+        }
+
+        return secretsList.length > 0 ? secretsList : false;
+    } catch (e) {
+        (0,core.info)(e?.message || `${e}`);
+        return false;
+    }
+};
+
 
 ;// CONCATENATED MODULE: external "./node_modules/@google-cloud/storage/build/src/index.js"
 var storage_x = y => { var x = {}; __nccwpck_require__.d(x, y); return x; }
@@ -66034,10 +66090,27 @@ const run_getClient = async () => {
 
 // createService
 
-const createService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId, instances, vpcConnectorId) => {
+const createService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId, instances, vpcConnectorId, secrets = []) => {
     if (!serviceName || !image) return false;
     try {
         const { serviceAccount, project } = await run_getClient();
+        
+        // Merge environment variables with secrets
+        const allEnvVars = [...envVariables];
+        if (secrets && secrets.length > 0) {
+            for (const secret of secrets) {
+                allEnvVars.push({
+                    name: secret.name,
+                    valueSource: {
+                        secretKeyRef: {
+                            secret: secret.secretId,
+                            version: secret.version
+                        }
+                    }
+                });
+            }
+        }
+        
         const config = {
             parent: `projects/${project}/locations/${defaultLocation}`,
             service: {
@@ -66045,7 +66118,7 @@ const createService = async (serviceName, image, envVariables = [], defaultLocat
                 template: { 
                     serviceAccount, 
                     timeout: { seconds: 900 },
-                    containers: [ { image, env: envVariables, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
+                    containers: [ { image, env: allEnvVars, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
                     ...databaseConnectionId && { volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] }, 
                     scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 },
                     ...vpcConnectorId && { vpcAccess: { connector: `projects/${project}/locations/${defaultLocation}/connectors/${vpcConnectorId}`, egress: 'ALL_TRAFFIC' } }
@@ -66067,10 +66140,27 @@ const createService = async (serviceName, image, envVariables = [], defaultLocat
 
 // updateService
 
-const updateService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId, instances, vpcConnectorId) => {
+const updateService = async (serviceName, image, envVariables = [], defaultLocation, databaseConnectionId, instances, vpcConnectorId, secrets = []) => {
     if (!serviceName || !image) return false;
     try {
         const { serviceAccount, project } = await run_getClient();
+        
+        // Merge environment variables with secrets
+        const allEnvVars = [...envVariables];
+        if (secrets && secrets.length > 0) {
+            for (const secret of secrets) {
+                allEnvVars.push({
+                    name: secret.name,
+                    valueSource: {
+                        secretKeyRef: {
+                            secret: secret.secretId,
+                            version: secret.version
+                        }
+                    }
+                });
+            }
+        }
+        
         const config = {
             service: {
                 name: `projects/${project}/locations/${defaultLocation}/services/${serviceName}`,
@@ -66078,7 +66168,7 @@ const updateService = async (serviceName, image, envVariables = [], defaultLocat
                 template: { 
                     serviceAccount, 
                     timeout: { seconds: 900 },
-                    containers: [ { image, env: envVariables, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
+                    containers: [ { image, env: allEnvVars, ...databaseConnectionId && { volumeMounts: [ { mountPath: '/cloudsql', name: 'cloudsql' }] } }],
                     ...databaseConnectionId && { volumes: [ { name: 'cloudsql', cloudSqlInstance: { instances: [ databaseConnectionId ] } }] }, 
                     scaling: { minInstanceCount: instances || 0, maxInstanceCount: 100 },
                     ...vpcConnectorId && { vpcAccess: { connector: `projects/${project}/locations/${defaultLocation}/connectors/${vpcConnectorId}`, egress: 'ALL_TRAFFIC' } }
@@ -66250,7 +66340,7 @@ const createMapping = async (serviceName, subdomain, backendLink, sysConfig) => 
 
 
 
-const createBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances, subdomain, vpcConnectorId) => {
+const createBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances, subdomain, vpcConnectorId, secrets = []) => {
     console.time();
 
     (0,core.info)('STEP 1 of 10: Beginning archive...');
@@ -66266,7 +66356,7 @@ const createBackend = async (folderPath, serviceName, location, envVariables, co
     if (!build) return (0,core.setFailed)('Build creation failed!', build);
 
     (0,core.info)('STEP 4 of 10: Beginning service creation... (2/3 longrunning - 25%)');
-    const service = await createService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId, instances, vpcConnectorId);
+    const service = await createService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId, instances, vpcConnectorId, secrets);
     if (!service) return (0,core.setFailed)('Service creation failed!', service);
 
     (0,core.info)('STEP 5 of 10: Beginning public access...');
@@ -66298,7 +66388,7 @@ const createBackend = async (folderPath, serviceName, location, envVariables, co
     return true;
 };
 
-const updateBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances, vpcConnectorId) => {
+const updateBackend = async (folderPath, serviceName, location, envVariables, config, databaseConnectionId, instances, vpcConnectorId, secrets = []) => {
     console.time();
 
     (0,core.info)('STEP 1 of 5: Beginning archive...');
@@ -66315,7 +66405,7 @@ const updateBackend = async (folderPath, serviceName, location, envVariables, co
     if (!build) return (0,core.setFailed)('Build creation failed!', build);
 
     (0,core.info)('STEP 4 of 5: Beginning service creation... (2/2 longrunning - 30%)');
-    const service = await updateService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId, instances, vpcConnectorId);
+    const service = await updateService(serviceName, build?.artifacts?.images?.[0], envVariables, location, databaseConnectionId, instances, vpcConnectorId, secrets);
     if (!service) return (0,core.setFailed)('Service creation failed!', service);
 
     (0,core.info)('STEP 5 of 5: Beginning file clean-up...');
@@ -66510,21 +66600,27 @@ const runApp = async () => {
             const template = (0,core.getInput)('template');
             const vpc_connector = (0,core.getInput)('vpc_connector');
             const env_variables = (0,core.getInput)('env_variables');
+            const secrets_variables = (0,core.getInput)('secrets_variables');
             // get variables
             const variables = await readEnvironmentVariables(path, environment, template, env_variables);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
+            // get secrets
+            const secrets = await readSecrets(path, secrets_variables);
             // get database
-            return createBackend(path, name, location, variables, config, database, instances, subdomain, vpc_connector);
+            return createBackend(path, name, location, variables, config, database, instances, subdomain, vpc_connector, secrets || []);
         } else if (operation === 'update' && type === 'backend') {
             const environment = (0,core.getInput)('environment');
             const instances = (0,core.getInput)('instances');
             const template = (0,core.getInput)('template');
             const vpc_connector = (0,core.getInput)('vpc_connector');
             const env_variables = (0,core.getInput)('env_variables');
+            const secrets_variables = (0,core.getInput)('secrets_variables');
             // get variables
             const variables = await readEnvironmentVariables(path, environment, template, env_variables);
             if (!variables) return (0,core.setFailed)('Err: Could not access variables.');
-            return updateBackend(path, name, location, variables, config, database, instances, vpc_connector);
+            // get secrets
+            const secrets = await readSecrets(path, secrets_variables);
+            return updateBackend(path, name, location, variables, config, database, instances, vpc_connector, secrets || []);
         } return (0,core.setFailed)('Err: Invalid operation and/or deployment types.');
     } catch (e) {
         console.error(e);

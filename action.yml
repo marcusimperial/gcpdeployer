@@ -50,6 +50,9 @@ inputs:
   env_variables:
     description: "Multiline KEY=VALUE environment variables"
     required: false
+  secrets_variables:
+    description: "Multiline SECRET_NAME=secret-id:version secrets from Secret Manager"
+    required: false
 
 runs:
   using: "node20"
